@@ -8,6 +8,7 @@ public class TalkifyBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(TalkifyBackendApplication.class, args);
+		System.out.println("Ram");
 	}
 
 }
