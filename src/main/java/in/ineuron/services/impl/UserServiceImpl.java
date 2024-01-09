@@ -46,42 +46,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User fetchUserByPhone(String phone) {
-
-        return userRepo.findByPhone(phone);
+    public User fetchUserByPhone(String phone) throws UserNotFoundException {
+        return userRepo.findByPhone(phone).orElseThrow(
+                ()->new UserNotFoundException("User not found with phone "+phone)
+        );
     }
 
     @Override
-    public User fetchUserByEmail(String email) {
-
-        return userRepo.findByEmail(email);
+    public User fetchUserByEmail(String email) throws UserNotFoundException {
+        return userRepo.findByEmail(email).orElseThrow(
+                ()->new UserNotFoundException("User not found with email "+email)
+        );
     }
 
     @Override
     public User registerUser(User user) {
-
         return userRepo.save(user);
     }
 
     @Override
-    public void updateUserPassword(Long userId, String newPassword) {
-        Optional<User> userOptional = userRepo.findById(userId);
-
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-            user.setPassword(newPassword);
-            userRepo.save(user);
-        }
+    public User updateUserPassword(Long userId, String newPassword) throws UserNotFoundException {
+        User user = fetchUserById(userId);
+        user.setPassword(newPassword);
+        return userRepo.save(user);
     }
 
     @Override
     public User fetchUserById(Long userId) throws UserNotFoundException {
-        Optional<User> userOptional = userRepo.findById(userId);
-
-        if(userOptional.isPresent()) {
-            return userOptional.get();
-        }
-        throw new UserNotFoundException("User not found with id "+userId);
+        return userRepo.findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with id " + userId)
+        );
     }
 
     @Override
@@ -91,20 +85,12 @@ public class UserServiceImpl implements UserService {
         if(userId==null){
             throw new BadCredentialsException("Token expired...");
         }
-        Optional<User> opt = userRepo.findById(userId);
-
-        if(opt.isPresent()){
-            return opt.get();
-        }else {
-            throw new UserNotFoundException("User not found with id "+userId);
-        }
+        return fetchUserById(userId);
     }
 
     @Override
     public List<User> searchUser(String query) {
         return userRepo.searchUser(query);
-
     }
-
 
 }

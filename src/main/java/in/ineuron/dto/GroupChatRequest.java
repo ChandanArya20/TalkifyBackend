@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class GroupChatRequest {
-    private String chatName;
-    private String chatImage;
+    private String groupName;
+    private String groupImage;
     private List<Long> userIds;
 }

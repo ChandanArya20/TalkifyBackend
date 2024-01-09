@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,14 +26,17 @@ public class Chat {
     private String chatImage;
     private Boolean isGroup;
 
+    @ManyToMany
+    private Set<User> admins=new HashSet<>();
+
     @ManyToOne
     private User createdBy;
 
     @ManyToMany
-    private Set<User> users;
+    private Set<User> users=new HashSet<>();
 
     @OneToMany
-    private List<Message> messages;
+    private List<Message> messages=new ArrayList<>();
 
 
 }

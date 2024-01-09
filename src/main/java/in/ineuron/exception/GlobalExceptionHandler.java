@@ -23,6 +23,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
     }
 
+    @ExceptionHandler(UserNotAuthorizedException.class)
+    public ResponseEntity<ErrorDetails> unauthorizedUserExceptionHandler(UserNotAuthorizedException exception,
+                                                             WebRequest request){
+
+        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage(), request.getDescription(false),
+                LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+    }
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorDetails> userExceptionHandler(BadCredentialsException exception,
                                                              WebRequest request){

@@ -7,13 +7,14 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
      public boolean existsByPhone(String phone);
 	 public boolean existsByEmail(String email);
-	 public User findByPhone(String phone);
-	 public User findByEmail(String email);
+	 public Optional<User> findByPhone(String phone);
+	 public Optional<User> findByEmail(String email);
 
 	 @Query("SELECT u FROM User u WHERE u.name LIKE %:query% OR u.email LIKE %:query%")
 	 public List<User> searchUser(String query);
