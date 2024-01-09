@@ -1,7 +1,11 @@
 package in.ineuron.services;
 
 import in.ineuron.dto.UserResponse;
+import in.ineuron.exception.BadCredentialsException;
+import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.User;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -11,8 +15,10 @@ public interface UserService {
     public User fetchUserByPhone(String phone);
     public User fetchUserByEmail(String email);
 
-    boolean updateUserPassword(Long userId, String newPassword);
+    void updateUserPassword(Long userId, String newPassword);
 
-    public UserResponse fetchUserDetails(Long userId);
+    public UserResponse fetchUserById(Long userId) throws UserNotFoundException;
+    public UserResponse fetchUserByAuthToken(String token) throws UserNotFoundException, BadCredentialsException;
 
+    public List<UserResponse> searchUser(String query);
 }

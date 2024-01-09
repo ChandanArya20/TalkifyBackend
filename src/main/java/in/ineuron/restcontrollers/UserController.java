@@ -4,6 +4,7 @@ import in.ineuron.dto.LoginRequest;
 import in.ineuron.dto.RegisterRequest;
 import in.ineuron.dto.UpdateUserPasswordDTO;
 import in.ineuron.dto.UserResponse;
+import in.ineuron.exception.BadCredentialsException;
 import in.ineuron.models.User;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
@@ -24,6 +25,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -72,11 +74,8 @@ public class UserController {
 			// Copy request data to User entity
 			User user = new User();
 			BeanUtils.copyProperties(requestData, user);
-
 			// Encrypt the user's password
-			String encodedPwd = passwordEncoder.encode(user.getPassword());
-			user.setPassword(encodedPwd);
-
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
 			// Register the user in the system
 			userService.registerUser(user);
 
@@ -105,7 +104,7 @@ public class UserController {
 			UserResponse userResponse = new UserResponse();
 			BeanUtils.copyProperties(user, userResponse);
 
-			String token = tokenService.generateToken();
+			String token = tokenService.generateToken(user.getId());
 
 			Cookie cookie = new Cookie("auth-token", token);
 			cookie.setHttpOnly(true);
@@ -137,7 +136,7 @@ public class UserController {
 	}
 
 	@GetMapping("/check-login")
-	public ResponseEntity<String> checkUserLogin(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<String> checkUserLogin(HttpServletRequest request, HttpServletResponse response) throws BadCredentialsException {
 
 		if (userUtils.validateToken(request)) {
 			return ResponseEntity.ok("User is logged in");
@@ -174,7 +173,7 @@ public class UserController {
 					otpStorage.removeOTP(email);
 
 					//setting token for authorized user who wants to change password
-					String token = tokenService.generateToken();
+					String token = tokenService.generateToken(null);
 					Cookie cookie = new Cookie("otpVerified-token", token);
 					cookie.setHttpOnly(true);
 					int maxAge=5*60;  // 5 minutes in seconds
@@ -194,12 +193,10 @@ public class UserController {
 
 	@PostMapping("/otp-verified/update-password")
 	public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified(
-			@RequestBody UpdateUserPasswordDTO userCredential, HttpServletRequest request ) {
-
-		System.out.println(userUtils.getOTPAuthToken(request));
+			@RequestBody UpdateUserPasswordDTO userCredential, HttpServletRequest request ) throws BadCredentialsException {
 
 		if(!userUtils.validateOTPAuthToken(request)){
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session is expired or token not found with request");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session is expired");
 		} else {
 
 			User user= userService.fetchUserByEmail(userCredential.getEmail());
@@ -214,14 +211,19 @@ public class UserController {
 		}
 	}
 
-	// Method to handle a different endpoint
+	@GetMapping("/search/{query}")
+	public ResponseEntity<List<UserResponse>> searchUsersHandler(String query){
+		List<UserResponse> userResponses = userService.searchUser(query);
+		return  ResponseEntity.status(HttpStatus.OK).body(userResponses);
+	}
+
 	@GetMapping("/test-cookie")
-	public ResponseEntity<String> someOtherEndpoint(HttpServletRequest request) {
+	public ResponseEntity<String> someOtherEndpoint(HttpServletRequest request) throws BadCredentialsException {
 
 		if(userUtils.validateToken(request)){
 			return ResponseEntity.ok("Valid token");
 		}else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is expired or not available in request");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is expired");
 		}
     }
 

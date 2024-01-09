@@ -1,15 +1,21 @@
 package in.ineuron.utils;
 
+import in.ineuron.dto.UserResponse;
+import in.ineuron.exception.BadCredentialsException;
+import in.ineuron.models.User;
 import in.ineuron.services.TokenStorageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -87,29 +93,37 @@ public class UserUtils {
      * @param request HttpServletRequest object
      * @return True if the token is valid, otherwise false
      */
-    public boolean validateToken(HttpServletRequest request) {
+    public boolean validateToken(HttpServletRequest request) throws BadCredentialsException {
 
         String authToken = getAuthToken(request);
-
-        System.out.println(authToken);
-
-        if(authToken != null){
-            return tokenService.isValidToken(authToken);
-        } else {
-            return false;
+        if(authToken==null){
+            throw new BadCredentialsException("Token not found with request");
         }
+
+        return tokenService.isValidToken(authToken);
     }
 
-    public boolean validateOTPAuthToken(HttpServletRequest request) {
+    public boolean validateOTPAuthToken(HttpServletRequest request) throws BadCredentialsException {
 
-        String authToken = getOTPAuthToken(request);
+        String otpAuthToken = getOTPAuthToken(request);
 
-        System.out.println(authToken);
-
-        if(authToken != null){
-            return tokenService.isValidToken(authToken);
-        } else {
-            return false;
+        if(otpAuthToken==null){
+            throw new BadCredentialsException("Token not found with request");
         }
+
+        return tokenService.isValidToken(otpAuthToken);
+
     }
+
+    public List<UserResponse> getUserResponse(List<User> users){
+        List<UserResponse> userResponses = new ArrayList<>();
+
+        for(User user:users){
+            UserResponse userResponse = new UserResponse();
+            BeanUtils.copyProperties(user,userResponse);
+            userResponses.add(userResponse);
+        }
+        return userResponses;
+    }
+
 }
