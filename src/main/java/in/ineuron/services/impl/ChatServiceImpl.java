@@ -1,17 +1,45 @@
 package in.ineuron.services.impl;
 
 import in.ineuron.dto.GroupChatRequest;
+import in.ineuron.dto.UserResponse;
 import in.ineuron.exception.ChatNotFoundException;
 import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.Chat;
+import in.ineuron.models.User;
+import in.ineuron.repositories.ChatRepository;
 import in.ineuron.services.ChatService;
+import in.ineuron.services.UserService;
 
 import java.util.List;
 
 public class ChatServiceImpl implements ChatService {
+
+    private ChatRepository chatRepo;
+    private UserService userService;
+
+    public ChatServiceImpl(ChatRepository chatRepo, UserService userService) {
+        this.chatRepo = chatRepo;
+        this.userService = userService;
+    }
+
     @Override
-    public Chat createChat(Long reqUserId, Long participantId) {
-        return null;
+    public Chat createChat(Long reqUserId, Long participantId) throws UserNotFoundException {
+
+        User reqUser = userService.fetchUserById(reqUserId);
+        User participantUser = userService.fetchUserById(participantId);
+
+        Chat chat = chatRepo.findSingleChatByUserIds(reqUserId, participantId);
+        if(chat!=null){
+            return chat;
+        }
+
+        Chat newChat = new Chat();
+        newChat.setCreatedBy(reqUser);
+        newChat.getUsers().add(reqUser);
+        newChat.getUsers().add(participantUser);
+        newChat.setIsGroup(false);
+
+        return newChat;
     }
 
     @Override

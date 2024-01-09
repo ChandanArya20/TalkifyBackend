@@ -115,6 +115,14 @@ public class UserUtils {
 
     }
 
+    public UserResponse getUserResponse(User user){
+
+        UserResponse userResponse = new UserResponse();
+        BeanUtils.copyProperties(user,userResponse);
+
+        return userResponse;
+    }
+
     public List<UserResponse> getUserResponse(List<User> users){
         List<UserResponse> userResponses = new ArrayList<>();
 

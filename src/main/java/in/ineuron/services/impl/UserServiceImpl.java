@@ -58,10 +58,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void registerUser(User user) {
+    public User registerUser(User user) {
 
-        User regUser = userRepo.save(user);
-        System.out.println(regUser);
+        return userRepo.save(user);
     }
 
     @Override
@@ -76,21 +75,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse fetchUserById(Long userId) throws UserNotFoundException {
+    public User fetchUserById(Long userId) throws UserNotFoundException {
         Optional<User> userOptional = userRepo.findById(userId);
 
         if(userOptional.isPresent()) {
-            User user = userOptional.get();
-            UserResponse userResponse = new UserResponse();
-            BeanUtils.copyProperties(user, userResponse);
-
-            return userResponse;
+            return userOptional.get();
         }
         throw new UserNotFoundException("User not found with id "+userId);
     }
 
     @Override
-    public UserResponse fetchUserByAuthToken(String token) throws UserNotFoundException, BadCredentialsException {
+    public User fetchUserByAuthToken(String token) throws UserNotFoundException, BadCredentialsException {
         Long userId = tokenService.getUserIdFromToken(token);
 
         if(userId==null){
@@ -99,20 +94,16 @@ public class UserServiceImpl implements UserService {
         Optional<User> opt = userRepo.findById(userId);
 
         if(opt.isPresent()){
-            UserResponse userResponse = new UserResponse();
-            BeanUtils.copyProperties(opt.get(), userResponse);
-            return userResponse;
+            return opt.get();
         }else {
             throw new UserNotFoundException("User not found with id "+userId);
         }
     }
 
     @Override
-    public List<UserResponse> searchUser(String query) {
+    public List<User> searchUser(String query) {
+        return userRepo.searchUser(query);
 
-        List<User> users = userRepo.searchUser(query);
-
-        return userUtils.getUserResponse(users);
     }
 
 

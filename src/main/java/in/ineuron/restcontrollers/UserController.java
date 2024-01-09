@@ -77,9 +77,9 @@ public class UserController {
 			// Encrypt the user's password
 			user.setPassword(passwordEncoder.encode(user.getPassword()));
 			// Register the user in the system
-			userService.registerUser(user);
+			User regUser = userService.registerUser(user);
 
-			return ResponseEntity.ok("User registered successfully...");
+			return ResponseEntity.ok(userUtils.getUserResponse(regUser));
 		}
 	}
 
@@ -212,9 +212,10 @@ public class UserController {
 	}
 
 	@GetMapping("/search/{query}")
-	public ResponseEntity<List<UserResponse>> searchUsersHandler(String query){
-		List<UserResponse> userResponses = userService.searchUser(query);
-		return  ResponseEntity.status(HttpStatus.OK).body(userResponses);
+	public ResponseEntity<List<UserResponse>> searchUsersHandler( @PathVariable String query){
+
+		List<User> users = userService.searchUser(query);
+		return  ResponseEntity.status(HttpStatus.OK).body(userUtils.getUserResponse(users));
 	}
 
 	@GetMapping("/test-cookie")
