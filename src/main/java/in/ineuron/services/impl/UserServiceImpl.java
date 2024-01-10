@@ -46,14 +46,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User fetchUserByPhone(String phone) throws UserNotFoundException {
+    public User fetchUserByPhone(String phone){
         return userRepo.findByPhone(phone).orElseThrow(
                 ()->new UserNotFoundException("User not found with phone "+phone)
         );
     }
 
     @Override
-    public User fetchUserByEmail(String email) throws UserNotFoundException {
+    public User fetchUserByEmail(String email){
         return userRepo.findByEmail(email).orElseThrow(
                 ()->new UserNotFoundException("User not found with email "+email)
         );
@@ -65,21 +65,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUserPassword(Long userId, String newPassword) throws UserNotFoundException {
+    public User updateUserPassword(Long userId, String newPassword) {
         User user = fetchUserById(userId);
         user.setPassword(newPassword);
         return userRepo.save(user);
     }
 
     @Override
-    public User fetchUserById(Long userId) throws UserNotFoundException {
+    public User fetchUserById(Long userId) {
         return userRepo.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("User not found with id " + userId)
         );
     }
 
     @Override
-    public User fetchUserByAuthToken(String token) throws UserNotFoundException, BadCredentialsException {
+    public User fetchUserByAuthToken(String token) {
         Long userId = tokenService.getUserIdFromToken(token);
 
         if(userId==null){

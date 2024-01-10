@@ -5,6 +5,7 @@ import in.ineuron.dto.RegisterRequest;
 import in.ineuron.dto.UpdateUserPasswordDTO;
 import in.ineuron.dto.UserResponse;
 import in.ineuron.exception.BadCredentialsException;
+import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.User;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
@@ -136,9 +137,9 @@ public class UserController {
 	}
 
 	@GetMapping("/check-login")
-	public ResponseEntity<String> checkUserLogin(HttpServletRequest request, HttpServletResponse response) throws BadCredentialsException {
+	public ResponseEntity<String> checkUserLogin(HttpServletRequest request, HttpServletResponse response) {
 
-		if (userUtils.validateToken(request)) {
+		if (userUtils.isValidUser(request)) {
 			return ResponseEntity.ok("User is logged in");
 		} else {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User login session has expired");
@@ -193,7 +194,7 @@ public class UserController {
 
 	@PostMapping("/otp-verified/update-password")
 	public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified(
-			@RequestBody UpdateUserPasswordDTO userCredential, HttpServletRequest request ) throws BadCredentialsException {
+			@RequestBody UpdateUserPasswordDTO userCredential, HttpServletRequest request ) {
 
 		if(!userUtils.validateOTPAuthToken(request)){
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session is expired");
@@ -219,9 +220,9 @@ public class UserController {
 	}
 
 	@GetMapping("/test-cookie")
-	public ResponseEntity<String> someOtherEndpoint(HttpServletRequest request) throws BadCredentialsException {
+	public ResponseEntity<String> someOtherEndpoint(HttpServletRequest request) {
 
-		if(userUtils.validateToken(request)){
+		if(userUtils.isValidUser(request)){
 			return ResponseEntity.ok("Valid token");
 		}else {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is expired");

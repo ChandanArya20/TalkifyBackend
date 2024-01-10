@@ -12,13 +12,13 @@ public interface UserService {
     public Boolean isUserAvailableByPhone(String phone);
     public Boolean isUserAvailableByEmail(String email);
     public User registerUser(User user);
-    public User fetchUserByPhone(String phone) throws UserNotFoundException;
-    public User fetchUserByEmail(String email) throws UserNotFoundException;
+    public User fetchUserByPhone(String phone);
+    public User fetchUserByEmail(String email);
 
-    public User updateUserPassword(Long userId, String newPassword) throws UserNotFoundException;
+    public User updateUserPassword(Long userId, String newPassword);
 
-    public User fetchUserById(Long userId) throws UserNotFoundException;
-    public User fetchUserByAuthToken(String token) throws UserNotFoundException, BadCredentialsException;
+    public User fetchUserById(Long userId);
+    public User fetchUserByAuthToken(String token);
 
     public List<User> searchUser(String query);
 }

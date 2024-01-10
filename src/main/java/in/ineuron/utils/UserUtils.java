@@ -93,13 +93,12 @@ public class UserUtils {
      * @param request HttpServletRequest object
      * @return True if the token is valid, otherwise false
      */
-    public boolean validateToken(HttpServletRequest request) throws BadCredentialsException {
+    public boolean isValidUser(HttpServletRequest request) throws BadCredentialsException {
 
         String authToken = getAuthToken(request);
         if(authToken==null){
             throw new BadCredentialsException("Token not found with request");
         }
-
         return tokenService.isValidToken(authToken);
     }
 
@@ -110,9 +109,12 @@ public class UserUtils {
         if(otpAuthToken==null){
             throw new BadCredentialsException("Token not found with request");
         }
-
         return tokenService.isValidToken(otpAuthToken);
+    }
 
+    public Long getRequestingUserId(HttpServletRequest request) {
+        String token = getAuthToken(request);
+        return tokenService.getUserIdFromToken(token);
     }
 
     public UserResponse getUserResponse(User user){
