@@ -19,7 +19,7 @@ public class UserValidationAspect {
     }
 
     @Before("@annotation(in.ineuron.annotation.ValidateUser) && args(request, ..)")
-    public void validateUserBeforeMethodExecution(JoinPoint joinPoint, HttpServletRequest request) {
+    public void validateUserBeforeMethodExecution( HttpServletRequest request) {
         if (!userUtils.isValidUser(request)) {
             throw new TokenExpiredException("Session is expired");
         }

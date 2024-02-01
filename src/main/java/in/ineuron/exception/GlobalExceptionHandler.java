@@ -15,9 +15,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorDetails> userExceptionHandler(UserNotFoundException exception){
-        System.out.println("User not found "+exception);
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
 
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
     }
 
@@ -25,14 +24,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDetails> unauthorizedUserExceptionHandler(UserNotAuthorizedException exception){
 
         ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
+
+    @ExceptionHandler(InvalidRequestDataException.class)
+    public ResponseEntity<ErrorDetails> InvalidRequestDataExceptionHandler(InvalidRequestDataException exception){
+
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getErrorResults().toString(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorDetails> userExceptionHandler(BadCredentialsException exception){
 
         ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
 

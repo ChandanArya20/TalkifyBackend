@@ -1,5 +1,6 @@
 package in.ineuron.restcontrollers;
 
+import in.ineuron.annotation.ValidateRequestData;
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.LoginRequest;
 import in.ineuron.dto.RegisterRequest;
@@ -58,14 +59,8 @@ public class UserController {
 
     // Endpoint for registering a new user
     @PostMapping("/register")
+    @ValidateRequestData
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest requestData, BindingResult result, HttpServletResponse response) {
-
-        //checks the bean field errors
-        Map<String, String> errorResults = userUtils.validateUserCredential(result);
-        if (!errorResults.isEmpty()) {
-            System.out.println(errorResults);
-            return ResponseEntity.badRequest().body(errorResults);
-        }
 
         // Check if the email is already registered
         if (userService.isUserAvailableByEmail(requestData.getEmail())) {
@@ -93,15 +88,9 @@ public class UserController {
         }
     }
 
-    // Endpoint for user login
+    @ValidateRequestData
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginData, BindingResult result, HttpServletResponse response) {
-
-        //checks the bean field errors
-        Map<String, String> errorResults = userUtils.validateUserCredential(result);
-        if (!errorResults.isEmpty()) {
-            return ResponseEntity.badRequest().body(errorResults);
-        }
 
         // Login using email
         User user = userService.fetchUserByEmail(loginData.getEmail());
@@ -123,9 +112,9 @@ public class UserController {
         }
     }
 
-    @GetMapping("/logout")
     @ValidateUser
-    public ResponseEntity<?> loginUser(HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/logout")
+    public ResponseEntity<?> logoutUser(HttpServletRequest request, HttpServletResponse response) {
 
         String authToken = userUtils.getAuthToken(request);
 
@@ -163,9 +152,7 @@ public class UserController {
 
         if (userService.isUserAvailableByEmail(email)) {
             Integer OTP = null;
-
             OTP = otpSender.sendOTPByEmail(email);
-
             otpStorage.storeOTP(email, String.valueOf(OTP));
 
             return ResponseEntity.ok("Sent OTP: " + OTP);
@@ -179,48 +166,41 @@ public class UserController {
             @RequestParam("email") String email,
             @RequestParam String otp, HttpServletResponse response) throws MessagingException {
 
-        if (userService.isUserAvailableByEmail(email)) {
-
-            if (otpStorage.verifyOTP(email, otp)) {
-                otpStorage.removeOTP(email);
-
-                //setting token for authorized user who wants to change password
-                String token = tokenService.generateToken(null);
-                Cookie cookie = new Cookie("otpVerified-token", token);
-                cookie.setHttpOnly(true);
-                int maxAge = 5 * 60;  // 5 minutes in seconds
-                cookie.setMaxAge(maxAge);
-
-                response.addCookie(cookie);
-
-                return ResponseEntity.ok("verified successfully.. ");
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP verification failed.. ");
-            }
-
-        } else {
+        if (!userService.isUserAvailableByEmail(email)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found for " + email);
+        }
+
+        if (otpStorage.verifyOTP(email, otp)) {
+            otpStorage.removeOTP(email);
+
+            //setting token for authorized user who wants to change password
+            String token = tokenService.generateToken(null);
+            Cookie cookie = new Cookie("otpVerified-token", token);
+            cookie.setHttpOnly(true);
+            int maxAge = 5 * 60;  // 5 minutes in seconds
+            cookie.setMaxAge(maxAge);
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok("verified successfully.. ");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP verification failed.. ");
         }
     }
 
+    @ValidateUser
     @PostMapping("/otp-verified/update-password")
-    public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified(
-            @RequestBody UpdateUserPasswordDTO userCredential, HttpServletRequest request) {
+    public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified( @Valid @RequestBody UpdateUserPasswordDTO userCredential,
+            BindingResult result, HttpServletRequest request) {
 
-        if (!userUtils.validateOTPAuthToken(request)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session is expired");
-        } else {
-
-            User user = userService.fetchUserByEmail(userCredential.getEmail());
-
-            if (user != null) {
-                userService.updateUserPassword(user.getId(), passwordEncoder.encode(userCredential.getNewPassword()));
-                return ResponseEntity.ok("Password updated successfully..");
-
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found...");
-            }
+        //checks the bean field errors
+        Map<String, String> errorResults = userUtils.validateUserCredential(result);
+        if (!errorResults.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorResults);
         }
+
+        User user = userService.fetchUserByEmail(userCredential.getEmail());
+        userService.updateUserPassword(user.getId(), passwordEncoder.encode(userCredential.getNewPassword()));
+        return ResponseEntity.ok("Password updated successfully..");
     }
 
     @ValidateUser
