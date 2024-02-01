@@ -17,7 +17,7 @@ public interface UserService {
 
     public User updateUserPassword(Long userId, String newPassword);
 
-    public User fetchUserById(Long userId);
+    public User findUserById(Long userId);
     public User fetchUserByAuthToken(String token);
 
     public List<User> searchUser(String query);

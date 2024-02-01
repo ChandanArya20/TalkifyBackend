@@ -11,8 +11,7 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 public class LoginRequest {
 
-	@NotNull(message = "Email is required, please enter email")
-	@NotEmpty(message = "Email should not be empty")
+	@NotBlank(message = "Email is required, please enter email")
 	@Email(regexp = "^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
 	message="invalid email!")
 	private String email;

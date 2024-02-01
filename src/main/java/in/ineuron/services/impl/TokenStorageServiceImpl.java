@@ -14,15 +14,15 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class TokenStorageServiceImpl implements TokenStorageService {
-    private static final long CLEANUP_INTERVAL_MINUTES = 10;
+    private static final long CLEANUP_INTERVAL_MINUTES = 1;
     private static final long TOKEN_EXPIRY_DURATION_MILLIS = 7 * 24 * 60 * 60 * 1000; // 7 days milliseconds
 
     private final Map<String, TokenInfo> tokenMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
     public TokenStorageServiceImpl() {
-        // Schedule a cleanup task to remove expired tokens every 1 minute.
-        executorService.scheduleAtFixedRate(this::cleanUpExpiredTokens, CLEANUP_INTERVAL_MINUTES, CLEANUP_INTERVAL_MINUTES, TimeUnit.SECONDS);
+        // Schedule a cleanup task to remove expired tokens every 1 Hour.
+        executorService.scheduleAtFixedRate(this::cleanUpExpiredTokens, CLEANUP_INTERVAL_MINUTES, CLEANUP_INTERVAL_MINUTES, TimeUnit.HOURS);
     }
 
     @Override

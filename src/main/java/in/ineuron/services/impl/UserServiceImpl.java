@@ -66,13 +66,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUserPassword(Long userId, String newPassword) {
-        User user = fetchUserById(userId);
+        User user = findUserById(userId);
         user.setPassword(newPassword);
         return userRepo.save(user);
     }
 
     @Override
-    public User fetchUserById(Long userId) {
+    public User findUserById(Long userId) {
         return userRepo.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("User not found with id " + userId)
         );
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
         if(userId==null){
             throw new BadCredentialsException("Token expired...");
         }
-        return fetchUserById(userId);
+        return findUserById(userId);
     }
 
     @Override

@@ -32,8 +32,8 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Chat createSingleChat(Long reqUserId, Long participantId) {
 
-        User reqUser = userService.fetchUserById(reqUserId);
-        User participantUser = userService.fetchUserById(participantId);
+        User reqUser = userService.findUserById(reqUserId);
+        User participantUser = userService.findUserById(participantId);
 
         Chat chat = chatRepo.findSingleChatByUserIds(reqUserId, participantId);
         if (chat != null) {
@@ -58,14 +58,14 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<Chat> findAllChatsByUserId(Long userId) {
-        User user = userService.fetchUserById(userId);
-        return chatRepo.findChatByUsersContaining(user);
+        User user = userService.findUserById(userId);
+        return chatRepo.findByUsersContaining(user);
     }
 
     @Override
     public Chat createGroup(GroupChatRequest req, Long reqUserId) {
         Chat group = new Chat();
-        User createdBy = userService.fetchUserById(reqUserId);
+        User createdBy = userService.findUserById(reqUserId);
 
         group.setIsGroup(true);
         group.setChatName(req.getGroupName());
@@ -84,8 +84,8 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Chat addUserToGroup(Long chatId, Long userId, Long reqUserId) {
         Chat chat = findChatById(chatId);
-        User reqUser = userService.fetchUserById(reqUserId);
-        User user = userService.fetchUserById(userId);
+        User reqUser = userService.findUserById(reqUserId);
+        User user = userService.findUserById(userId);
 
         if (chat.getAdmins().contains(reqUser)) {
             chat.getAdmins().add(user);
@@ -98,7 +98,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Chat renameGroup(Long chatId, String newGroupName, Long reqUserId) {
         Chat chat = findChatById(chatId);
-        User reqUser = userService.fetchUserById(reqUserId);
+        User reqUser = userService.findUserById(reqUserId);
 
         if (chat.getUsers().contains(reqUser)) {
             chat.setChatName(newGroupName);
@@ -113,8 +113,8 @@ public class ChatServiceImpl implements ChatService {
     public Chat removeUserFromGroup(Long chatId, Long userId, Long reqUserId) {
 
         Chat chat = findChatById(chatId);
-        User reqUser = userService.fetchUserById(reqUserId);
-        User user = userService.fetchUserById(userId);
+        User reqUser = userService.findUserById(reqUserId);
+        User user = userService.findUserById(userId);
 
         if (chat.getAdmins().contains(reqUser)) {
             chat.getAdmins().remove(user);
@@ -134,7 +134,7 @@ public class ChatServiceImpl implements ChatService {
     public void deleteChat(Long chatId, Long userId) {
 
         Chat chat = findChatById(chatId);
-        User user = userService.fetchUserById(userId);
+        User user = userService.findUserById(userId);
 
         if (chat.getIsGroup() && !chat.getAdmins().contains(user)) {
             throw new UserNotAuthorizedException("Only admins are allowed to delete the group chat");

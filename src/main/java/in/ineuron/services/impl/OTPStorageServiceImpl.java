@@ -52,17 +52,15 @@ public class OTPStorageServiceImpl implements OTPStorageService {
         long currentTime = System.currentTimeMillis();
         // Iterate through the OTP map and remove entries older than the expiration duration.
         otpMap.entrySet().removeIf(entry -> (currentTime - entry.getValue().getCreationTime() > OTP_EXPIRY_DURATION_MILLIS));
-        // Log statement: System.out.println("Expired OTPs cleaned up");
+
     }
 
-    // Shutdown the executor service when the application stops
-    // (Note: This may be done in a @PreDestroy method or elsewhere in the application lifecycle)
     @PreDestroy
     public void shutdownExecutorService() {
         executorService.shutdown();
     }
 
-    // Nested class representing an OTP entry
+    // Inner class representing an OTP entry
     @Getter
     private static class OTPEntry {
         private final String otp;

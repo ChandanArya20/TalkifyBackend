@@ -14,41 +14,42 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorDetails> userExceptionHandler(UserNotFoundException exception,
-                                                              WebRequest request){
-
-        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage(), request.getDescription(false),
-                LocalDateTime.now());
+    public ResponseEntity<ErrorDetails> userExceptionHandler(UserNotFoundException exception){
+        System.out.println("User not found "+exception);
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
     }
 
     @ExceptionHandler(UserNotAuthorizedException.class)
-    public ResponseEntity<ErrorDetails> unauthorizedUserExceptionHandler(UserNotAuthorizedException exception,
-                                                             WebRequest request){
+    public ResponseEntity<ErrorDetails> unauthorizedUserExceptionHandler(UserNotAuthorizedException exception){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage(), request.getDescription(false),
-                LocalDateTime.now());
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorDetails> userExceptionHandler(BadCredentialsException exception,
-                                                             WebRequest request){
+    public ResponseEntity<ErrorDetails> userExceptionHandler(BadCredentialsException exception){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage(), request.getDescription(false),
-                LocalDateTime.now());
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> exceptionHandler(Exception exception,
-                                                             WebRequest request){
+    @ExceptionHandler(MessageNotFoundException.class)
+    public ResponseEntity<ErrorDetails> userExceptionHandler(MessageNotFoundException exception ){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage(), request.getDescription(false),
-                LocalDateTime.now());
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDetails> globalExceptionHandler(Exception exception){
+
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus. INTERNAL_SERVER_ERROR).body(errorDetails);
+    }
+
+
+
 }

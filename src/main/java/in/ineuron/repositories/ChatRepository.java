@@ -12,7 +12,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("SELECT c FROM Chat c WHERE c.isGroup=false AND :reqUserId MEMBER OF c.users AND :participantId MEMBER OF c.users")
     public Chat findSingleChatByUserIds(Long reqUserId, Long participantId );
 
-    public List<Chat> findChatByUsersContaining(User user);
+    public List<Chat> findByUsersContaining(User user);
 
 
 }

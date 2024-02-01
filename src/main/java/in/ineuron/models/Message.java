@@ -1,15 +1,13 @@
 package in.ineuron.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@AllArgsConstructor
+@Data
 public class Message {
 
     @Id
