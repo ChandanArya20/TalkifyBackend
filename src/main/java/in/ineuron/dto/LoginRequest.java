@@ -8,7 +8,6 @@ import jakarta.validation.constraints.*;
 
 @Getter
 @ToString
-@NoArgsConstructor
 public class LoginRequest {
 
 	@NotBlank(message = "Email is required, please enter email")
@@ -22,14 +21,4 @@ public class LoginRequest {
              message = "Invalid password")
 	private String password;
 
-
-	public void setEmail(String email) {
-		this.email = email.trim();
-	}
-	
-	public void setPassword(String password) {
-		this.password = password.trim();
-	}
-	
-	
 }

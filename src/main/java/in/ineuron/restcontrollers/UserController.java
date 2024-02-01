@@ -75,21 +75,18 @@ public class UserController {
         if (requestData.getPhone() != null && userService.isUserAvailableByPhone(requestData.getPhone())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Phone No. already registered with another account");
         } else {
-            // Copy request data to User entity
             User user = new User();
             BeanUtils.copyProperties(requestData, user);
-            // Encrypt the user's password
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));  // Encrypt the user's password
+
             // Register the user in the system
             User regUser = userService.registerUser(user);
 
             String token = tokenService.generateToken(user.getId());
-            //setting cookie
-            Cookie cookie = new Cookie("auth-token", token);
+            Cookie cookie = new Cookie("auth-token", token);   //setting cookie
             cookie.setHttpOnly(true);
             int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
             cookie.setMaxAge(maxAge);
-//			cookie.setSecure(true);  //only for https
             response.addCookie(cookie);
 
             return ResponseEntity.ok(userUtils.getUserResponse(regUser));
@@ -108,9 +105,7 @@ public class UserController {
 
         // Login using email
         User user = userService.fetchUserByEmail(loginData.getEmail());
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found for this email");
-        } else if (!passwordEncoder.matches(loginData.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginData.getPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password");
         } else {
             // Create a response object and set an authentication token cookie
@@ -118,13 +113,10 @@ public class UserController {
             BeanUtils.copyProperties(user, userResponse);
 
             String token = tokenService.generateToken(user.getId());
-
-            //setting cookie
-            Cookie cookie = new Cookie("auth-token", token);
+            Cookie cookie = new Cookie("auth-token", token);    //setting cookie
             cookie.setHttpOnly(true);
             int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
             cookie.setMaxAge(maxAge);
-//			cookie.setSecure(true);  //only for https
             response.addCookie(cookie);
 
             return ResponseEntity.ok(userResponse);
