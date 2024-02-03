@@ -19,6 +19,7 @@ public class LoginRequest {
 	@NotBlank(message = "Password should not be empty or null")
     @Pattern(regexp = "^(?!.*\\s).*$",
              message = "Invalid password")
+	@Size(min = 8, message = "Password should have minimum 8 characters")
 	private String password;
 
 }

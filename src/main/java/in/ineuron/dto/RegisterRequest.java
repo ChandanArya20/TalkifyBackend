@@ -26,6 +26,7 @@ public class RegisterRequest {
 	@NotBlank(message = "Password should not be empty or null")
     @Pattern(regexp = "^(?!.*\\s).*$",
              message = "Space is not allowed")
+	@Size(min = 8, message = "Password should have minimum 8 characters")
 	private String password;
 
 	@AssertTrue(message = "Invalid phone format")

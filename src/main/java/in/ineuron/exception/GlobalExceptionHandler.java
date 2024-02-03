@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDetails> InvalidRequestDataExceptionHandler(InvalidRequestDataException exception){
 
         ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getErrorResults().toString(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
