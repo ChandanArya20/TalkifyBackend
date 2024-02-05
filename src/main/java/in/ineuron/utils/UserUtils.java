@@ -41,22 +41,6 @@ public class UserUtils {
         return errorsMap;
     }
 
-    public String getAuthToken(HttpServletRequest request) {
-
-        Cookie[] cookies = request.getCookies();
-
-        System.out.println(cookies);
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("auth-token".equals(cookie.getName()) && !cookie.getValue().isBlank()) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        throw new TokenException("Token not found with request");
-    }
-
     public String getOTPAuthToken(HttpServletRequest request) {
 
         Cookie[] cookies = request.getCookies();
@@ -71,15 +55,6 @@ public class UserUtils {
         throw new TokenException("OTP-Token not found with request");
     }
 
-    public boolean isValidUser(HttpServletRequest request) throws BadCredentialsException {
-
-        String authToken = getAuthToken(request);
-        if(authToken==null){
-            throw new BadCredentialsException("Token not found with request");
-        }
-        return tokenService.isValidToken(authToken);
-    }
-
     public boolean validateOTPAuthToken(HttpServletRequest request) throws BadCredentialsException {
 
         String otpAuthToken = getOTPAuthToken(request);
@@ -88,11 +63,6 @@ public class UserUtils {
             throw new BadCredentialsException("Token not found with request");
         }
         return tokenService.isValidToken(otpAuthToken);
-    }
-
-    public Long getRequestingUserId(HttpServletRequest request) {
-        String token = getAuthToken(request);
-        return tokenService.getUserIdFromToken(token);
     }
 
     public UserResponse getUserResponse(User user){

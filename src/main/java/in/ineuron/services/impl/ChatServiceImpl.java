@@ -1,6 +1,5 @@
 package in.ineuron.services.impl;
 
-import in.ineuron.dto.ChatResponse;
 import in.ineuron.dto.GroupChatRequest;
 import in.ineuron.exception.ChatNotFoundException;
 import in.ineuron.exception.UserNotAuthorizedException;
@@ -37,24 +36,23 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatResponse createSingleChat(Long reqUserId, Long participantId) {
+    public Chat createSingleChat(Long reqUserId, Long participantId) {
 
         User reqUser = userService.findUserById(reqUserId);
         User participantUser = userService.findUserById(participantId);
 
         Optional<Chat> chatOptional = chatRepo.findSingleChatByUserIds(reqUser, participantUser);
         if(chatOptional.isPresent()){
-            return chatUtils.getChatResponse(chatOptional.get());
+            return chatOptional.get();
         }
 
         Chat newChat = new Chat();
         newChat.setCreatedBy(reqUser);
-        newChat.getUsers().add(reqUser);
-        newChat.getUsers().add(participantUser);
+        newChat.getMembers().add(reqUser);
+        newChat.getMembers().add(participantUser);
         newChat.setIsGroup(false);
 
-        Chat createdChat = chatRepo.save(newChat);  //saving to database
-        return  chatUtils.getChatResponse(createdChat);
+        return chatRepo.save(newChat);  //saving to database
     }
 
     @Override
@@ -67,7 +65,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<Chat> findAllChatsByUserId(Long userId) {
         User user = userService.findUserById(userId);
-        return chatRepo.findByUsersContaining(user);
+        return chatRepo.findByMembersContaining(user);
     }
 
     @Override
@@ -80,15 +78,15 @@ public class ChatServiceImpl implements ChatService {
         group.setChatImage(req.getGroupImage());
         group.getAdmins().add(createdBy);
         group.setCreatedBy(createdBy);
+        group.getMembers().add(createdBy);
 
-        for (Long userId : req.getUserIds()) {
-            User user = new User();
-            user.setId(userId);
-            group.getUsers().add(user);
+        for (Long memberId : req.getMembersId()) {
+            User member = userService.findUserById(memberId);
+            group.getMembers().add(member);
         }
-        return group;
-    }
 
+        return chatRepo.save(group);
+    }
     @Override
     public Chat addUserToGroup(Long chatId, Long userId, Long reqUserId) {
         Chat chat = findChatById(chatId);
@@ -108,7 +106,7 @@ public class ChatServiceImpl implements ChatService {
         Chat chat = findChatById(chatId);
         User reqUser = userService.findUserById(reqUserId);
 
-        if (chat.getUsers().contains(reqUser)) {
+        if (chat.getMembers().contains(reqUser)) {
             chat.setChatName(newGroupName);
             return chatRepo.save(chat);
         } else {
@@ -126,9 +124,9 @@ public class ChatServiceImpl implements ChatService {
 
         if (chat.getAdmins().contains(reqUser)) {
             chat.getAdmins().remove(user);
-        } else if (chat.getUsers().contains(reqUser)) {
+        } else if (chat.getMembers().contains(reqUser)) {
             if (userId.equals(reqUserId)) {
-                chat.getUsers().remove(user);
+                chat.getMembers().remove(user);
             } else {
                 throw new UserNotAuthorizedException("You can't remove another user");
             }
@@ -148,7 +146,7 @@ public class ChatServiceImpl implements ChatService {
             throw new UserNotAuthorizedException("Only admins are allowed to delete the group chat");
         }
 
-        if (!chat.getUsers().contains(user)) {
+        if (!chat.getMembers().contains(user)) {
             throw new UserNotFoundException("User not found in the chat");
         }
         chatRepo.delete(chat);

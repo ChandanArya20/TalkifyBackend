@@ -1,27 +1,30 @@
 package in.ineuron.aspect;
 
 import in.ineuron.exception.TokenException;
+import in.ineuron.services.TokenStorageService;
 import in.ineuron.utils.UserUtils;
-import jakarta.servlet.http.HttpServletRequest;;
+;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CookieValue;
 
 @Aspect
 @Component
 public class UserValidationAspect {
 
-    private final UserUtils userUtils;
+    private final TokenStorageService tokenService;
 
-    public UserValidationAspect(UserUtils userUtils) {
-        this.userUtils = userUtils;
+    public UserValidationAspect(TokenStorageService tokenService) {
+        this.tokenService = tokenService;
     }
 
-    @Before("@annotation(in.ineuron.annotation.ValidateUser) && args(request, ..)")
-    public void validateUserBeforeMethodExecution( HttpServletRequest request) {
-        System.out.println(userUtils.getAuthToken(request));
-        if (!userUtils.isValidUser(request)) {
+    @Before("@annotation(in.ineuron.annotation.ValidateUser) && args(authToken, ..)")
+    public void validateUserBeforeMethodExecution(@CookieValue("auth-token") String authToken) {
+        System.out.println(authToken);
+        if (!tokenService.isValidToken(authToken)) {
             throw new TokenException("Session is expired");
         }
     }
+
 }

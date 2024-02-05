@@ -31,7 +31,7 @@ public class Chat {
     private User createdBy;
 
     @ManyToMany
-    private Set<User> users=new HashSet<>();
+    private Set<User> members=new HashSet<>();
 
     @OneToMany
     private List<Message> messages=new ArrayList<>();

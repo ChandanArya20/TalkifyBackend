@@ -22,14 +22,14 @@ public class ChatUtils {
 
         UserResponse createdBy = userUtils.getUserResponse(chat.getCreatedBy());
         List<UserResponse> admins = userUtils.getUserResponse(chat.getAdmins());
-        List<UserResponse> users = userUtils.getUserResponse(chat.getUsers());
+        List<UserResponse> users = userUtils.getUserResponse(chat.getMembers());
 
         ChatResponse chatResponse = new ChatResponse();
         BeanUtils.copyProperties(chat,chatResponse);
 
         chatResponse.setCreatedBy(createdBy);
         chatResponse.setAdmins(new HashSet<>(admins));
-        chatResponse.setUsers(new HashSet<>(users));
+        chatResponse.setMembers(new HashSet<>(users));
 
         return chatResponse;
     }
@@ -41,14 +41,14 @@ public class ChatUtils {
 
             UserResponse createdBy = userUtils.getUserResponse(chat.getCreatedBy());
             List<UserResponse> admins = userUtils.getUserResponse(chat.getAdmins());
-            List<UserResponse> users = userUtils.getUserResponse(chat.getUsers());
+            List<UserResponse> users = userUtils.getUserResponse(chat.getMembers());
 
             ChatResponse chatResponse = new ChatResponse();
             BeanUtils.copyProperties(chat,chatResponse);
 
             chatResponse.setCreatedBy(createdBy);
             chatResponse.setAdmins(new HashSet<>(admins));
-            chatResponse.setUsers(new HashSet<>(users));
+            chatResponse.setMembers(new HashSet<>(users));
 
             chatResponses.add(chatResponse);
         }

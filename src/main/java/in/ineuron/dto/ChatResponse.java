@@ -24,7 +24,7 @@ public class ChatResponse {
 
     private UserResponse createdBy;
 
-    private Set<UserResponse> users=new HashSet<>();
+    private Set<UserResponse> members=new HashSet<>();
 
     private List<Message> messages=new ArrayList<>();
 

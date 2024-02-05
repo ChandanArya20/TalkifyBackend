@@ -8,6 +8,7 @@ import in.ineuron.models.User;
 import in.ineuron.services.ChatService;
 import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
+import in.ineuron.utils.ChatUtils;
 import in.ineuron.utils.UserUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -24,18 +25,20 @@ public class ChatController {
     private ChatService chatService;
     private UserService userService;
     private UserUtils userUtils;
+    private ChatUtils chatUtils;
     private TokenStorageService tokenService;
 
-
+    @ValidateUser
     @PostMapping("/single")
-    public ResponseEntity<ChatResponse> createSingleChatHandler(@RequestParam Long participantId, @CookieValue("auth-token") String authToken) {
-        System.out.println("From chat "+authToken);
-        User user = userService.fetchUserByAuthToken(authToken);
-        ChatResponse singleChat = chatService.createSingleChat(user.getId(), participantId);
+    public ResponseEntity<ChatResponse> createSingleChatHandler(@CookieValue("auth-token") String authToken, @RequestParam Long participantId) {
 
-        return ResponseEntity.ok(singleChat);
+        User user = userService.fetchUserByAuthToken(authToken);
+        Chat chat = chatService.createSingleChat(user.getId(), participantId);
+
+        return ResponseEntity.ok(chatUtils.getChatResponse(chat));
     }
 
+    @ValidateUser
     @GetMapping("/{chat-id}")
     public ResponseEntity<Chat> findChatByIdHandler(@PathVariable("chat-id") Long chatId, HttpServletRequest request) {
 
@@ -43,67 +46,63 @@ public class ChatController {
         return ResponseEntity.ok(chat);
     }
 
+    @ValidateUser
     @GetMapping("/all-chat")
-    public ResponseEntity<List<Chat>> findAllChatsByUserIdHandler(HttpServletRequest request) {
+    public ResponseEntity<List<ChatResponse>> findAllChatsByUserIdHandler(@CookieValue("auth-token") String authToken) {
 
-        Long userId = userUtils.getRequestingUserId(request);
+        Long userId = tokenService.getUserIdFromToken(authToken);
         List<Chat> chats = chatService.findAllChatsByUserId(userId);
 
-        return ResponseEntity.ok(chats);
+        return ResponseEntity.ok(chatUtils.getChatResponse(chats));
     }
 
+    @ValidateUser
     @PostMapping("/create-group")
-    public ResponseEntity<Chat> createGroupHandler(@RequestBody GroupChatRequest chatReq, HttpServletRequest request) {
+    public ResponseEntity<ChatResponse> createGroupHandler(@CookieValue("auth-token") String authToken,
+                                                           @RequestBody GroupChatRequest chatReq) {
 
-        Long userId = userUtils.getRequestingUserId(request);
+        Long userId = tokenService.getUserIdFromToken(authToken);
         Chat group = chatService.createGroup(chatReq, userId);
 
-        return ResponseEntity.ok(group);
+        return ResponseEntity.ok(chatUtils.getChatResponse(group));
     }
     @PutMapping("/{chat-id}/add-user/{user-to-add-id}")
-    public ResponseEntity<Chat> addUserToGroupHandler(@PathVariable("chat-id") Long chatId,
-            @PathVariable("user-to-add-id") Long userToAddId,  HttpServletRequest request) {
+    public ResponseEntity<Chat> addUserToGroupHandler(@CookieValue("auth-token") String authToken,
+            @PathVariable("chat-id") Long chatId, @PathVariable("user-to-add-id") Long userToAddId) {
 
-        Long reqUserId = userUtils.getRequestingUserId(request);
+        Long reqUserId = tokenService.getUserIdFromToken(authToken);
         Chat chat = chatService.addUserToGroup(chatId,userToAddId,reqUserId);
 
         return ResponseEntity.ok(chat);
     }
 
     @PutMapping("/{chat-id}/remove-user/{user-to-remove-id}")
-    public ResponseEntity<Chat> removeUserToGroupHandler(@PathVariable("chat-id") Long chatId,
-                                                      @PathVariable("user-to-remove-id") Long userToRemoveId,  HttpServletRequest request) {
+    public ResponseEntity<Chat> removeUserToGroupHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId,
+                                                      @PathVariable("user-to-remove-id") Long userToRemoveId) {
 
-        Long reqUserId = userUtils.getRequestingUserId(request);
+        Long reqUserId = tokenService.getUserIdFromToken(authToken);
         Chat chat = chatService.removeUserFromGroup(chatId,userToRemoveId,reqUserId);
 
         return ResponseEntity.ok(chat);
     }
 
     @PutMapping("/{chat-id}/rename-group/{new-name}")
-    public ResponseEntity<Chat> renameGroupHandler(@PathVariable("chat-id") Long chatId,
-                                                      @PathVariable("new-name") String newGroupName,  HttpServletRequest request) {
+    public ResponseEntity<Chat> renameGroupHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId,
+                                                      @PathVariable("new-name") String newGroupName) {
 
-        Long reqUserId = userUtils.getRequestingUserId(request);
+        Long reqUserId = tokenService.getUserIdFromToken(authToken);
         Chat chat = chatService.renameGroup(chatId,newGroupName, reqUserId);
 
         return ResponseEntity.ok(chat);
     }
 
     @DeleteMapping("/{chat-id}/delete-group")
-    public ResponseEntity<String> renameGroupHandler(@PathVariable("chat-id") Long chatId, HttpServletRequest request) {
+    public ResponseEntity<String> renameGroupHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId, HttpServletRequest request) {
 
-        Long userId = userUtils.getRequestingUserId(request);
+        Long userId = tokenService.getUserIdFromToken(authToken);
         chatService.deleteChat(chatId, userId);
 
         return ResponseEntity.ok("Chat deleted successfully..");
     }
-
-
-
-
-
-
-
 
 }

@@ -116,7 +116,6 @@ public class UserController {
         }
     }
 
-    @ValidateUser
     @GetMapping("/logout")
     public ResponseEntity<?> logoutUser(@CookieValue("auth-token") String authToken, HttpServletResponse response) {
         tokenService.removeToken(authToken);
@@ -131,18 +130,18 @@ public class UserController {
 
     @GetMapping("/profile")
     @ValidateUser
-    public ResponseEntity<UserResponse> getLoginUserDetails(HttpServletRequest request) {
+    public ResponseEntity<UserResponse> getLoginUserDetails(@CookieValue("auth-token") String authToken, HttpServletRequest request) {
 
-        Long id = userUtils.getRequestingUserId(request);
+        Long id = tokenService.getUserIdFromToken(authToken);
         UserResponse userResponse = userUtils.getUserResponse(userService.findUserById(id));
 
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     @GetMapping("/check-login")
-    public ResponseEntity<String> checkUserLogin(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> checkUserLogin(@CookieValue("auth-token") String authToken, HttpServletResponse response) {
 
-        if (userUtils.isValidUser(request)) {
+        if (tokenService.isValidToken(authToken)) {
             return ResponseEntity.ok("true, User is logged in");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User login session has expired");
@@ -180,6 +179,7 @@ public class UserController {
             String token = tokenService.generateToken(null);
             Cookie cookie = new Cookie("otpVerified-token", token);
             cookie.setHttpOnly(true);
+            cookie.setPath("/");
             int maxAge = 5 * 60;  // 5 minutes in seconds
             cookie.setMaxAge(maxAge);
             response.addCookie(cookie);
@@ -192,14 +192,8 @@ public class UserController {
 
     @ValidateUser
     @PostMapping("/otp-verified/update-password")
-    public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified( @Valid @RequestBody UpdateUserPasswordDTO userCredential,
-            BindingResult result, HttpServletRequest request) {
-
-        //checks the bean field errors
-        Map<String, String> errorResults = userUtils.validateUserCredential(result);
-        if (!errorResults.isEmpty()) {
-            return ResponseEntity.badRequest().body(errorResults);
-        }
+    public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified(@CookieValue("otpVerified-token") String authToken, @Valid @RequestBody UpdateUserPasswordDTO userCredential,
+            BindingResult result) {
 
         User user = userService.fetchUserByEmail(userCredential.getEmail());
         userService.updateUserPassword(user.getId(), passwordEncoder.encode(userCredential.getNewPassword()));
@@ -209,7 +203,7 @@ public class UserController {
     @ValidateUser
     @GetMapping("/search-users")
     public ResponseEntity<List<UserResponse>> searchUsersHandler(@CookieValue("auth-token") String authToken, @RequestParam String query) {
-        System.out.println(authToken);
+
         if(query.isEmpty()){
             return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
         }
@@ -218,9 +212,9 @@ public class UserController {
     }
 
     @GetMapping("/test-cookie")
-    public ResponseEntity<String> someOtherEndpoint(HttpServletRequest request) {
+    public ResponseEntity<String> someOtherEndpoint(@CookieValue("auth-token") String authToken) {
 
-        if (userUtils.isValidUser(request)) {
+        if (tokenService.isValidToken(authToken)) {
             return ResponseEntity.ok("Valid token");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is expired");
