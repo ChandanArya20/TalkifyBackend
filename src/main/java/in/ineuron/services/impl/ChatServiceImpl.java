@@ -1,8 +1,7 @@
 package in.ineuron.services.impl;
 
-import ch.qos.logback.core.util.DelayStrategy;
+import in.ineuron.dto.ChatResponse;
 import in.ineuron.dto.GroupChatRequest;
-import in.ineuron.dto.UserResponse;
 import in.ineuron.exception.ChatNotFoundException;
 import in.ineuron.exception.UserNotAuthorizedException;
 import in.ineuron.exception.UserNotFoundException;
@@ -11,6 +10,8 @@ import in.ineuron.models.User;
 import in.ineuron.repositories.ChatRepository;
 import in.ineuron.services.ChatService;
 import in.ineuron.services.UserService;
+import in.ineuron.utils.ChatUtils;
+import in.ineuron.utils.UserUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,23 +22,29 @@ import java.util.Optional;
 @Transactional
 public class ChatServiceImpl implements ChatService {
 
-    private ChatRepository chatRepo;
-    private UserService userService;
+    private final ChatRepository chatRepo;
+    private final UserService userService;
 
-    public ChatServiceImpl(ChatRepository chatRepo, UserService userService) {
+    private final UserUtils userUtils;
+
+    private final ChatUtils chatUtils;
+
+    public ChatServiceImpl(ChatRepository chatRepo, UserService userService, UserUtils userUtils, ChatUtils chatUtils) {
         this.chatRepo = chatRepo;
         this.userService = userService;
+        this.userUtils = userUtils;
+        this.chatUtils = chatUtils;
     }
 
     @Override
-    public Chat createSingleChat(Long reqUserId, Long participantId) {
+    public ChatResponse createSingleChat(Long reqUserId, Long participantId) {
 
         User reqUser = userService.findUserById(reqUserId);
         User participantUser = userService.findUserById(participantId);
 
-        Chat chat = chatRepo.findSingleChatByUserIds(reqUserId, participantId);
-        if (chat != null) {
-            return chat;
+        Optional<Chat> chatOptional = chatRepo.findSingleChatByUserIds(reqUser, participantUser);
+        if(chatOptional.isPresent()){
+            return chatUtils.getChatResponse(chatOptional.get());
         }
 
         Chat newChat = new Chat();
@@ -46,7 +53,8 @@ public class ChatServiceImpl implements ChatService {
         newChat.getUsers().add(participantUser);
         newChat.setIsGroup(false);
 
-        return newChat;
+        Chat createdChat = chatRepo.save(newChat);  //saving to database
+        return  chatUtils.getChatResponse(createdChat);
     }
 
     @Override

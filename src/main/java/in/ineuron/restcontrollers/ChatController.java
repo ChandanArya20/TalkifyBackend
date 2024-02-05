@@ -1,10 +1,8 @@
 package in.ineuron.restcontrollers;
 
 import in.ineuron.annotation.ValidateUser;
+import in.ineuron.dto.ChatResponse;
 import in.ineuron.dto.GroupChatRequest;
-import in.ineuron.exception.BadCredentialsException;
-import in.ineuron.exception.TokenExpiredException;
-import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.Chat;
 import in.ineuron.models.User;
 import in.ineuron.services.ChatService;
@@ -13,8 +11,6 @@ import in.ineuron.services.UserService;
 import in.ineuron.utils.UserUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.hibernate.engine.jdbc.CharacterStream;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat")
 @AllArgsConstructor
-@ValidateUser
 public class ChatController {
 
     private ChatService chatService;
@@ -33,11 +28,10 @@ public class ChatController {
 
 
     @PostMapping("/single")
-    public ResponseEntity<Chat> createSingleChatHandler(@RequestParam Long participantId, HttpServletRequest request) {
-
-        String authToken = userUtils.getAuthToken(request);
+    public ResponseEntity<ChatResponse> createSingleChatHandler(@RequestParam Long participantId, @CookieValue("auth-token") String authToken) {
+        System.out.println("From chat "+authToken);
         User user = userService.fetchUserByAuthToken(authToken);
-        Chat singleChat = chatService.createSingleChat(user.getId(), participantId);
+        ChatResponse singleChat = chatService.createSingleChat(user.getId(), participantId);
 
         return ResponseEntity.ok(singleChat);
     }
@@ -49,7 +43,7 @@ public class ChatController {
         return ResponseEntity.ok(chat);
     }
 
-    @GetMapping("/user/all-chat")
+    @GetMapping("/all-chat")
     public ResponseEntity<List<Chat>> findAllChatsByUserIdHandler(HttpServletRequest request) {
 
         Long userId = userUtils.getRequestingUserId(request);

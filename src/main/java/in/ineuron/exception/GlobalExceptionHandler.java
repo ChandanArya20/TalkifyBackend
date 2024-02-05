@@ -27,6 +27,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ErrorDetails> tokenNotFoundExceptionHandler(TokenException exception){
+
+        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+    }
+
     @ExceptionHandler(InvalidRequestDataException.class)
     public ResponseEntity<ErrorDetails> InvalidRequestDataExceptionHandler(InvalidRequestDataException exception){
 
@@ -50,7 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> globalExceptionHandler(Exception exception){
-
+        exception.printStackTrace();
         ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus. INTERNAL_SERVER_ERROR).body(errorDetails);
     }

@@ -18,7 +18,7 @@ public class CorsConfig {
 
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/api/**")
+				registry.addMapping("/**")
 		              .allowedOrigins(frontendAppURL) // Replace with the appropriate origin
 		              .allowedMethods("GET", "POST", "PUT","PATCH", "DELETE")
 		              .allowedHeaders("*")

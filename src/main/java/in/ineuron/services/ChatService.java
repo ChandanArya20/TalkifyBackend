@@ -1,5 +1,6 @@
 package in.ineuron.services;
 
+import in.ineuron.dto.ChatResponse;
 import in.ineuron.dto.GroupChatRequest;
 import in.ineuron.models.Chat;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public interface ChatService {
 
-    public Chat createSingleChat(Long reqUserId, Long participantId);
+    public ChatResponse createSingleChat(Long reqUserId, Long participantId);
     public Chat findChatById(Long chatId);
     public List<Chat> findAllChatsByUserId(Long userId);
     public Chat createGroup(GroupChatRequest req, Long reqUserId);

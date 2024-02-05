@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     @Query("SELECT c FROM Chat c WHERE c.isGroup=false AND :reqUserId MEMBER OF c.users AND :participantId MEMBER OF c.users")
-    public Chat findSingleChatByUserIds(Long reqUserId, Long participantId );
+    public Optional<Chat> findSingleChatByUserIds(User reqUserId, User participantId );
 
     public List<Chat> findByUsersContaining(User user);
 

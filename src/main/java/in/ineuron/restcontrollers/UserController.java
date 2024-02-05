@@ -28,6 +28,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -79,9 +80,10 @@ public class UserController {
 
             String token = tokenService.generateToken(user.getId());
             Cookie cookie = new Cookie("auth-token", token);   //setting cookie
-            cookie.setHttpOnly(true);
             int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
             cookie.setMaxAge(maxAge);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
             response.addCookie(cookie);
 
             return ResponseEntity.ok(userUtils.getUserResponse(regUser));
@@ -103,10 +105,12 @@ public class UserController {
 
             String token = tokenService.generateToken(user.getId());
             Cookie cookie = new Cookie("auth-token", token);    //setting cookie
-            cookie.setHttpOnly(true);
             int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
             cookie.setMaxAge(maxAge);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
             response.addCookie(cookie);
+
 
             return ResponseEntity.ok(userResponse);
         }
@@ -114,13 +118,12 @@ public class UserController {
 
     @ValidateUser
     @GetMapping("/logout")
-    public ResponseEntity<?> logoutUser(HttpServletRequest request, HttpServletResponse response) {
-
-        String authToken = userUtils.getAuthToken(request);
-
+    public ResponseEntity<?> logoutUser(@CookieValue("auth-token") String authToken, HttpServletResponse response) {
         tokenService.removeToken(authToken);
         Cookie cookie = new Cookie("auth-token", null);
+        cookie.setMaxAge(0);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
 
         return ResponseEntity.ok("User logged out successfully");
@@ -205,8 +208,11 @@ public class UserController {
 
     @ValidateUser
     @GetMapping("/search-users")
-    public ResponseEntity<List<UserResponse>> searchUsersHandler(@RequestParam String query) {
-
+    public ResponseEntity<List<UserResponse>> searchUsersHandler(@CookieValue("auth-token") String authToken, @RequestParam String query) {
+        System.out.println(authToken);
+        if(query.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
+        }
         List<User> users = userService.searchUser(query);
         return ResponseEntity.status(HttpStatus.OK).body(userUtils.getUserResponse(users));
     }

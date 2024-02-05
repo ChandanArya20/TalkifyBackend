@@ -32,6 +32,7 @@ public class TokenStorageServiceImpl implements TokenStorageService {
         TokenInfo tokenInfo = new TokenInfo(userId, creationTime);
         tokenMap.put(token, tokenInfo);
         // Log statement: System.out.println("Auth token generated: " + token);
+        System.out.println(tokenMap);
         return token;
     }
 

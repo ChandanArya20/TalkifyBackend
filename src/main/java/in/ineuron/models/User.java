@@ -25,6 +25,10 @@ public class User {
 	@Column(unique = true)
 	private String phone;
 
+	private String profileImage;
+
+	private String about;
+
 	@Column(nullable = false)
 	private String password;
 

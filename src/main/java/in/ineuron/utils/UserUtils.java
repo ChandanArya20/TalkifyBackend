@@ -2,6 +2,7 @@ package in.ineuron.utils;
 
 import in.ineuron.dto.UserResponse;
 import in.ineuron.exception.BadCredentialsException;
+import in.ineuron.exception.TokenException;
 import in.ineuron.models.User;
 import in.ineuron.services.TokenStorageService;
 import jakarta.servlet.http.Cookie;
@@ -13,10 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class UserUtils {
@@ -24,12 +22,6 @@ public class UserUtils {
     @Autowired
     private TokenStorageService tokenService;
 
-    /**
-     * Validate user credentials and extract error messages and field names.
-     *
-     * @param result BindingResult object containing validation errors
-     * @return Map containing field names as keys and error messages as values
-     */
     public Map<String, String> validateUserCredential(BindingResult result){
 
         Map<String, String> errorsMap = new HashMap<>();
@@ -49,50 +41,36 @@ public class UserUtils {
         return errorsMap;
     }
 
-    /**
-     * Get authentication token from the request's cookies.
-     *
-     * @param request HttpServletRequest object
-     * @return Authentication token or null if not found
-     */
     public String getAuthToken(HttpServletRequest request) {
 
         Cookie[] cookies = request.getCookies();
-        String authToken = null;
+
+        System.out.println(cookies);
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("auth-token".equals(cookie.getName()) && !cookie.getValue().isBlank()) {
-                    authToken = cookie.getValue();
-                    break;
+                    return cookie.getValue();
                 }
             }
         }
-        return authToken;
+        throw new TokenException("Token not found with request");
     }
 
     public String getOTPAuthToken(HttpServletRequest request) {
 
         Cookie[] cookies = request.getCookies();
-        String authToken = null;
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("otpVerified-token".equals(cookie.getName()) && !cookie.getValue().isBlank()) {
-                    authToken = cookie.getValue();
-                    break;
+                    return cookie.getValue();
                 }
             }
         }
-        return authToken;
+        throw new TokenException("OTP-Token not found with request");
     }
 
-    /**
-     * Validate the authenticity of the provided authentication token.
-     *
-     * @param request HttpServletRequest object
-     * @return True if the token is valid, otherwise false
-     */
     public boolean isValidUser(HttpServletRequest request) throws BadCredentialsException {
 
         String authToken = getAuthToken(request);
@@ -125,7 +103,7 @@ public class UserUtils {
         return userResponse;
     }
 
-    public List<UserResponse> getUserResponse(List<User> users){
+    public List<UserResponse> getUserResponse(Collection<User> users){
         List<UserResponse> userResponses = new ArrayList<>();
 
         for(User user:users){
