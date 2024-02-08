@@ -2,12 +2,7 @@ package in.ineuron.restcontrollers;
 
 import in.ineuron.annotation.ValidateRequestData;
 import in.ineuron.annotation.ValidateUser;
-import in.ineuron.dto.LoginRequest;
-import in.ineuron.dto.RegisterRequest;
-import in.ineuron.dto.UpdateUserPasswordDTO;
-import in.ineuron.dto.UserResponse;
-import in.ineuron.exception.BadCredentialsException;
-import in.ineuron.exception.UserNotFoundException;
+import in.ineuron.dto.*;
 import in.ineuron.models.User;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
@@ -30,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
@@ -209,6 +203,15 @@ public class UserController {
         }
         List<User> users = userService.searchUser(query);
         return ResponseEntity.status(HttpStatus.OK).body(userUtils.getUserResponse(users));
+    }
+
+    @PostMapping("update")
+    @ValidateUser
+    public ResponseEntity<UserResponse> updateUserHandler(@CookieValue("auth-token") String authToken,
+                                                 @RequestBody UserUpdateRequest userToUpdate) {
+        System.out.println(userToUpdate);
+        User user = userService.updateUser(userToUpdate);
+        return ResponseEntity.ok(userUtils.getUserResponse(user));
     }
 
     @GetMapping("/test-cookie")

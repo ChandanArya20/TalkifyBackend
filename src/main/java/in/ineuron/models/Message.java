@@ -1,5 +1,6 @@
 package in.ineuron.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -24,5 +25,16 @@ public class Message {
     private User createdBy;
 
     @ManyToOne
+    @JsonIgnore
     private Chat chat;
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", textMessage='" + textMessage + '\'' +
+                ", creationTime=" + creationTime +
+                ", createdBy=" + createdBy +
+                '}';
+    }
 }

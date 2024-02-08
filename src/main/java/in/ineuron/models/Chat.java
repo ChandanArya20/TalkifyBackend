@@ -36,5 +36,16 @@ public class Chat {
     @OneToMany
     private List<Message> messages=new ArrayList<>();
 
-
+    @Override
+    public String toString() {
+        return "Chat{" +
+                "id=" + id +
+                ", chatName='" + chatName + '\'' +
+                ", chatImage='" + chatImage + '\'' +
+                ", isGroup=" + isGroup +
+                ", admins=" + admins +
+                ", createdBy=" + createdBy +
+                ", members=" + members +
+                '}';
+    }
 }

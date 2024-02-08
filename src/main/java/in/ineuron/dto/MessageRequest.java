@@ -10,9 +10,6 @@ import lombok.ToString;
 @ToString
 public class MessageRequest {
 
-    @NotNull(message = "User ID must not be null")
-    private Long userId;
-
     @NotNull(message = "Chat ID must not be null")
     private Long chatId;
 

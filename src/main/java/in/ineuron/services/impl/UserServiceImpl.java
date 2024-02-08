@@ -1,6 +1,7 @@
 package in.ineuron.services.impl;
 
 import in.ineuron.dto.UserResponse;
+import in.ineuron.dto.UserUpdateRequest;
 import in.ineuron.exception.BadCredentialsException;
 import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.User;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,6 +93,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> searchUser(String query) {
         return userRepo.searchUser(query);
+    }
+
+    @Override
+    public User updateUser(UserUpdateRequest userToUpdate) {
+        User user = findUserById(userToUpdate.getId());
+
+        if(userToUpdate.getName()!=null)
+            user.setName(userToUpdate.getName());
+
+        if(userToUpdate.getPhone()!=null)
+            user.setPhone(userToUpdate.getPhone());
+
+        if(userToUpdate.getEmail()!=null)
+            user.setEmail(userToUpdate.getEmail());
+
+        if(userToUpdate.getProfileImage()!=null)
+            user.setProfileImage(userToUpdate.getProfileImage());
+
+        if(userToUpdate.getAbout()!=null)
+            user.setAbout(userToUpdate.getAbout());
+
+        System.out.println(user);
+        return userRepo.save(user);
     }
 
 }
